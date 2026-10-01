@@ -1,0 +1,19 @@
+Source: erik-desktop-base
+Section: metapackages
+Priority: optional
+Maintainer: Genotomi <dogukansahil@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/Genotomi/erikos
+
+Package: erik-desktop-base
+Architecture: all
+Depends: ${misc:Depends}, erik-base, erik-theme
+Recommends: gnome-core
+Conflicts: gnome-tour
+Description: Erik OS desktop edition defaults
+ Pulls in the Erik OS identity and theme and sets the GNOME desktop
+ defaults of the desktop edition. The GNOME welcome tour is not part
+ of Erik OS: this package conflicts with gnome-tour and turns off its
+ welcome dialog. The Erik appearance app greets new users instead.

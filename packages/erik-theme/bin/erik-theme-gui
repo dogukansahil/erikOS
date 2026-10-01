@@ -1,0 +1,473 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Doğukan Sahil
+"""erik-theme-gui: graphical Erik OS appearance settings (GTK 4, libadwaita)."""
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+APP_ID = "org.genotomi.ErikTheme"
+BACKGROUNDS = Path("/usr/share/backgrounds/erik")
+THUMBNAIL_WIDTH = 240
+THUMBNAIL_HEIGHT = 150
+CMDLINE = Path("/proc/cmdline")
+
+# Keys the "Restore Erik defaults" button resets: exactly the keys the
+# erik-theme command resets, plus the colour scheme. Keep in sync with
+# MANAGED_KEYS in /usr/bin/erik-theme.
+RESET_KEYS = (
+    ("org.gnome.desktop.background", "picture-uri"),
+    ("org.gnome.desktop.background", "picture-uri-dark"),
+    ("org.gnome.desktop.background", "picture-options"),
+    ("org.gnome.desktop.background", "primary-color"),
+    ("org.gnome.desktop.screensaver", "picture-uri"),
+    ("org.gnome.desktop.screensaver", "picture-options"),
+    ("org.gnome.desktop.screensaver", "primary-color"),
+    ("org.gnome.desktop.interface", "accent-color"),
+    ("org.gnome.desktop.interface", "color-scheme"),
+)
+
+COLOR_SCHEMES = ("default", "prefer-light", "prefer-dark")
+
+# Display names that differ from the file name (same as erik-backgrounds.xml).
+WALLPAPER_TITLES = {"pen": "Blueprint"}
+
+# GNOME accent colour names and the swatch colours shown on the buttons.
+ACCENTS = (
+    ("blue", "#3584e4"),
+    ("teal", "#2190a4"),
+    ("green", "#3a944a"),
+    ("yellow", "#c88800"),
+    ("orange", "#ed5b00"),
+    ("red", "#e62d42"),
+    ("pink", "#d56199"),
+    ("purple", "#9141ac"),
+    ("slate", "#6f8396"),
+)
+
+# Human-readable text in the four Erik OS languages.
+MESSAGES = {
+    "en": {
+        "title": "Erik Appearance",
+        "welcome_title": "Welcome to Erik OS",
+        "welcome_text": "Choose how your desktop looks. You can change this at any time in Erik Appearance.",
+        "style": "Style",
+        "style_default": "Default",
+        "style_light": "Light",
+        "style_dark": "Dark",
+        "accent": "Accent colour",
+        "wallpaper": "Wallpaper",
+        "no_wallpapers": "No Erik wallpapers are installed.",
+        "restore": "Restore Erik defaults",
+        "get_started": "Get started",
+        "blue": "Blue",
+        "teal": "Teal",
+        "green": "Green",
+        "yellow": "Yellow",
+        "orange": "Orange",
+        "red": "Red",
+        "pink": "Pink",
+        "purple": "Purple",
+        "slate": "Slate",
+    },
+    "de": {
+        "title": "Erik-Darstellung",
+        "welcome_title": "Willkommen bei Erik OS",
+        "welcome_text": "Wählen Sie das Aussehen Ihres Desktops. Sie können es jederzeit in der Erik-Darstellung ändern.",
+        "style": "Stil",
+        "style_default": "Standard",
+        "style_light": "Hell",
+        "style_dark": "Dunkel",
+        "accent": "Akzentfarbe",
+        "wallpaper": "Hintergrundbild",
+        "no_wallpapers": "Es sind keine Erik-Hintergrundbilder installiert.",
+        "restore": "Erik-Standards wiederherstellen",
+        "get_started": "Los geht's",
+        "blue": "Blau",
+        "teal": "Petrol",
+        "green": "Grün",
+        "yellow": "Gelb",
+        "orange": "Orange",
+        "red": "Rot",
+        "pink": "Rosa",
+        "purple": "Violett",
+        "slate": "Schiefergrau",
+    },
+    "es": {
+        "title": "Apariencia de Erik",
+        "welcome_title": "Bienvenido a Erik OS",
+        "welcome_text": "Elija el aspecto de su escritorio. Puede cambiarlo en cualquier momento en Apariencia de Erik.",
+        "style": "Estilo",
+        "style_default": "Predeterminado",
+        "style_light": "Claro",
+        "style_dark": "Oscuro",
+        "accent": "Color de énfasis",
+        "wallpaper": "Fondo de pantalla",
+        "no_wallpapers": "No hay fondos de pantalla de Erik instalados.",
+        "restore": "Restablecer valores de Erik",
+        "get_started": "Comenzar",
+        "blue": "Azul",
+        "teal": "Turquesa",
+        "green": "Verde",
+        "yellow": "Amarillo",
+        "orange": "Naranja",
+        "red": "Rojo",
+        "pink": "Rosa",
+        "purple": "Morado",
+        "slate": "Pizarra",
+    },
+    "tr": {
+        "title": "Erik Görünüm",
+        "welcome_title": "Erik OS'e hoş geldiniz",
+        "welcome_text": "Masaüstünüzün görünümünü seçin. Bunu istediğiniz zaman Erik Görünüm uygulamasından değiştirebilirsiniz.",
+        "style": "Stil",
+        "style_default": "Varsayılan",
+        "style_light": "Açık",
+        "style_dark": "Koyu",
+        "accent": "Vurgu rengi",
+        "wallpaper": "Duvar kağıdı",
+        "no_wallpapers": "Kurulu Erik duvar kağıdı yok.",
+        "restore": "Erik varsayılanlarını geri yükle",
+        "get_started": "Başlayın",
+        "blue": "Mavi",
+        "teal": "Turkuaz",
+        "green": "Yeşil",
+        "yellow": "Sarı",
+        "orange": "Turuncu",
+        "red": "Kırmızı",
+        "pink": "Pembe",
+        "purple": "Mor",
+        "slate": "Arduvaz",
+    },
+}
+
+
+def language():
+    for var in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
+        value = os.environ.get(var, "")
+        code = value.split(":")[0][:2].lower()
+        if code in MESSAGES:
+            return code
+    return "en"
+
+
+T = MESSAGES[language()]
+
+
+# First-run logic. Kept free of GTK so it can be tested on its own.
+
+def first_run_marker():
+    base = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
+    return Path(base) / "erik" / "first-run-done"
+
+
+def is_live_session(cmdline=CMDLINE):
+    try:
+        words = Path(cmdline).read_text().split()
+    except OSError:
+        return False
+    return "boot=live" in words
+
+
+def should_skip_first_run(cmdline=CMDLINE):
+    return first_run_marker().exists() or is_live_session(cmdline)
+
+
+def write_first_run_marker():
+    marker = first_run_marker()
+    try:
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.touch()
+    except OSError as error:
+        print(f"erik-theme-gui: {error}", file=sys.stderr)
+
+
+def wallpaper_names():
+    if not BACKGROUNDS.is_dir():
+        return []
+    return sorted(p.stem for p in BACKGROUNDS.glob("*.jpg"))
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="erik-theme-gui", description=T["title"])
+    parser.add_argument("--first-run", action="store_true")
+    args = parser.parse_args()
+
+    if args.first_run and should_skip_first_run():
+        return 0
+
+    import gi
+
+    gi.require_version("Gtk", "4.0")
+    gi.require_version("Adw", "1")
+    from gi.repository import Adw, Gdk, GdkPixbuf, Gio, GLib, Gtk
+
+    def settings_for(schema, key):
+        """Return Gio.Settings for the schema if it has the key, else None."""
+        source = Gio.SettingsSchemaSource.get_default()
+        found = source.lookup(schema, True) if source else None
+        if found is None or not found.has_key(key):
+            return None
+        return Gio.Settings.new(schema)
+
+    css = "".join(
+        f".erik-accent-{name} {{ background: {color}; color: #ffffff; "
+        f"min-width: 34px; min-height: 34px; padding: 0; }}\n"
+        for name, color in ACCENTS
+    )
+    css += ".erik-thumb { border-radius: 8px; }\n"
+
+    class Window(Adw.ApplicationWindow):
+        def __init__(self, app, first_run):
+            super().__init__(application=app, title=T["title"])
+            self.first_run = first_run
+            self.updating = False
+            self.thumb_names = []
+            self.background = settings_for("org.gnome.desktop.background", "picture-uri")
+            self.background_dark = settings_for("org.gnome.desktop.background", "picture-uri-dark")
+            self.screensaver = settings_for("org.gnome.desktop.screensaver", "picture-uri")
+            self.interface_scheme = settings_for("org.gnome.desktop.interface", "color-scheme")
+            self.interface_accent = settings_for("org.gnome.desktop.interface", "accent-color")
+            self.set_default_size(720, 800 if first_run else 720)
+            self.set_icon_name("erik-logo")
+            self.connect("close-request", self.on_close)
+
+            content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24)
+            content.set_margin_top(24)
+            content.set_margin_bottom(24)
+            content.set_margin_start(16)
+            content.set_margin_end(16)
+
+            if first_run:
+                content.append(self.build_welcome())
+            content.append(self.build_style_group())
+            if self.interface_accent is not None:
+                content.append(self.build_accent_group())
+            content.append(self.build_wallpaper_group())
+            content.append(self.build_footer())
+
+            clamp = Adw.Clamp(maximum_size=640, child=content)
+            scrolled = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, child=clamp)
+            scrolled.set_vexpand(True)
+            view = Adw.ToolbarView()
+            view.add_top_bar(Adw.HeaderBar())
+            view.set_content(scrolled)
+            self.set_content(view)
+            self.refresh()
+            GLib.idle_add(self.load_thumbnails)
+
+        def build_welcome(self):
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+            title = Gtk.Label(label=T["welcome_title"], wrap=True, justify=Gtk.Justification.CENTER)
+            title.add_css_class("title-1")
+            text = Gtk.Label(label=T["welcome_text"], wrap=True, justify=Gtk.Justification.CENTER)
+            text.add_css_class("dim-label")
+            box.append(title)
+            box.append(text)
+            return box
+
+        def build_style_group(self):
+            group = Adw.PreferencesGroup()
+            labels = Gtk.StringList.new(
+                [T["style_default"], T["style_light"], T["style_dark"]]
+            )
+            self.style_row = Adw.ComboRow(title=T["style"], model=labels)
+            self.style_row.set_sensitive(self.interface_scheme is not None)
+            self.style_row.connect("notify::selected", self.on_style_changed)
+            group.add(self.style_row)
+            return group
+
+        def build_accent_group(self):
+            group = Adw.PreferencesGroup(title=T["accent"])
+            box = Gtk.Box(spacing=12, halign=Gtk.Align.CENTER)
+            box.set_margin_top(6)
+            box.set_margin_bottom(6)
+            self.accent_buttons = {}
+            first = None
+            for name, _color in ACCENTS:
+                button = Gtk.ToggleButton()
+                button.add_css_class("circular")
+                button.add_css_class(f"erik-accent-{name}")
+                button.set_tooltip_text(T[name])
+                button.update_property([Gtk.AccessibleProperty.LABEL], [T[name]])
+                if first is None:
+                    first = button
+                else:
+                    button.set_group(first)
+                button.connect("toggled", self.on_accent_toggled, name)
+                self.accent_buttons[name] = button
+                box.append(button)
+            group.add(box)
+            return group
+
+        def build_wallpaper_group(self):
+            group = Adw.PreferencesGroup(title=T["wallpaper"])
+            names = wallpaper_names()
+            if not names:
+                label = Gtk.Label(label=T["no_wallpapers"], wrap=True)
+                label.add_css_class("dim-label")
+                group.add(label)
+                self.flow = None
+                return group
+            self.thumb_names = names
+            self.flow = Gtk.FlowBox(
+                selection_mode=Gtk.SelectionMode.SINGLE,
+                homogeneous=True,
+                min_children_per_line=2,
+                max_children_per_line=3,
+                row_spacing=12,
+                column_spacing=12,
+                activate_on_single_click=True,
+            )
+            self.pictures = []
+            for name in names:
+                picture = Gtk.Picture(content_fit=Gtk.ContentFit.COVER, can_shrink=True)
+                picture.set_size_request(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)
+                picture.add_css_class("erik-thumb")
+                picture.set_overflow(Gtk.Overflow.HIDDEN)
+                label = Gtk.Label(label=WALLPAPER_TITLES.get(name, name.replace("-", " ").capitalize()))
+                label.add_css_class("caption")
+                box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+                box.set_margin_top(6)
+                box.set_margin_bottom(6)
+                box.set_margin_start(6)
+                box.set_margin_end(6)
+                box.append(picture)
+                box.append(label)
+                child = Gtk.FlowBoxChild(child=box)
+                child.update_property([Gtk.AccessibleProperty.LABEL], [label.get_label()])
+                self.flow.append(child)
+                self.pictures.append(picture)
+            self.flow.connect("child-activated", self.on_wallpaper_activated)
+            group.add(self.flow)
+            return group
+
+        def build_footer(self):
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, halign=Gtk.Align.CENTER)
+            restore = Gtk.Button(label=T["restore"])
+            restore.add_css_class("pill")
+            restore.connect("clicked", self.on_restore)
+            box.append(restore)
+            if self.first_run:
+                start = Gtk.Button(label=T["get_started"])
+                start.add_css_class("suggested-action")
+                start.add_css_class("pill")
+                start.connect("clicked", lambda _b: self.close())
+                box.append(start)
+            return box
+
+        def load_thumbnails(self):
+            """Load one thumbnail per idle call so the window appears at once."""
+            if not hasattr(self, "thumb_index"):
+                self.thumb_index = 0
+            if self.flow is None or self.thumb_index >= len(self.thumb_names):
+                return False
+            name = self.thumb_names[self.thumb_index]
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    str(BACKGROUNDS / f"{name}.jpg"), THUMBNAIL_WIDTH * 2, -1, True
+                )
+                self.pictures[self.thumb_index].set_paintable(Gdk.Texture.new_for_pixbuf(pixbuf))
+            except GLib.Error as error:
+                print(f"erik-theme-gui: {name}: {error.message}", file=sys.stderr)
+            self.thumb_index += 1
+            return True
+
+        def refresh(self):
+            """Show the current settings in the window."""
+            self.updating = True
+            try:
+                if self.interface_scheme is not None:
+                    scheme = self.interface_scheme.get_string("color-scheme")
+                    if scheme in COLOR_SCHEMES:
+                        self.style_row.set_selected(COLOR_SCHEMES.index(scheme))
+                if self.interface_accent is not None:
+                    accent = self.interface_accent.get_string("accent-color")
+                    for name, button in self.accent_buttons.items():
+                        button.set_active(name == accent)
+                        self.mark_accent(button, name == accent)
+                if self.flow is not None and self.background is not None:
+                    uri = self.background.get_string("picture-uri")
+                    prefix = f"file://{BACKGROUNDS}/"
+                    self.flow.unselect_all()
+                    if uri.startswith(prefix) and uri.endswith(".jpg"):
+                        name = uri[len(prefix):-4]
+                        if name in self.thumb_names:
+                            index = self.thumb_names.index(name)
+                            self.flow.select_child(self.flow.get_child_at_index(index))
+            finally:
+                self.updating = False
+
+        @staticmethod
+        def mark_accent(button, selected):
+            """Show a check mark on the selected accent colour."""
+            button.set_child(
+                Gtk.Image.new_from_icon_name("object-select-symbolic") if selected else None
+            )
+
+        def on_style_changed(self, row, _param):
+            if self.updating or self.interface_scheme is None:
+                return
+            self.interface_scheme.set_string("color-scheme", COLOR_SCHEMES[row.get_selected()])
+            Gio.Settings.sync()
+
+        def on_accent_toggled(self, button, name):
+            if self.updating or not button.get_active():
+                return
+            self.interface_accent.set_string("accent-color", name)
+            Gio.Settings.sync()
+            for other, other_button in self.accent_buttons.items():
+                self.mark_accent(other_button, other == name)
+
+        def on_wallpaper_activated(self, _flow, child):
+            if self.updating:
+                return
+            name = self.thumb_names[child.get_index()]
+            uri = f"file://{BACKGROUNDS}/{name}.jpg"
+            for settings, key in (
+                (self.background, "picture-uri"),
+                (self.background_dark, "picture-uri-dark"),
+                (self.screensaver, "picture-uri"),
+            ):
+                if settings is not None:
+                    settings.set_string(key, uri)
+            Gio.Settings.sync()
+
+        def on_restore(self, _button):
+            for schema, key in RESET_KEYS:
+                settings = settings_for(schema, key)
+                if settings is not None:
+                    settings.reset(key)
+            Gio.Settings.sync()
+            self.refresh()
+
+        def on_close(self, _window):
+            if self.first_run:
+                write_first_run_marker()
+            return False
+
+    class Application(Adw.Application):
+        def __init__(self):
+            super().__init__(application_id=APP_ID)
+            self.connect("activate", self.on_activate)
+
+        def on_activate(self, app):
+            window = self.get_active_window()
+            if window is None:
+                provider = Gtk.CssProvider()
+                provider.load_from_string(css)
+                Gtk.StyleContext.add_provider_for_display(
+                    Gdk.Display.get_default(), provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+                )
+                window = Window(app, args.first_run)
+            window.present()
+
+    GLib.set_application_name(T["title"])
+    return Application().run([sys.argv[0]])
+
+
+if __name__ == "__main__":
+    sys.exit(main())

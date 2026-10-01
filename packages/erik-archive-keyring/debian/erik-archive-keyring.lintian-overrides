@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Installing the Erik repository entry is the purpose of this package on
+# Erik OS, a Debian derivative. It touches no Debian archive entry.
+erik-archive-keyring: package-installs-apt-sources [etc/apt/sources.list.d/erik.sources]

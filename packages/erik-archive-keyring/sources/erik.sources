@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Erik OS package repository. Erik tools: sudo apt install erik-<tool>
+# Disabled until the repository is published; see packages/README.md, "Publishing".
+Enabled: no
+Types: deb
+URIs: https://genotomi.github.io/erik-packages
+Suites: stable
+Components: main
+Signed-By: /usr/share/keyrings/erik-archive-keyring.gpg

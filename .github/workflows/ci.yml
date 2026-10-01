@@ -1,0 +1,47 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Every push and pull request: repository hygiene, license policy and all
+# Erik packages built and checked with lintian, on a clean Debian 13.
+# ISO builds stay on the release machine (they need several GB and root).
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  ERIK_WORK_DIR: /tmp/erik-work
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+      - name: Install tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git ca-certificates python3 build-essential debhelper dpkg-dev lintian
+
+      - uses: actions/checkout@v4
+
+      - name: Mark the checkout as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Repository check (secrets, forbidden files, line endings)
+        run: python3 scripts/check-repo.py
+
+      - name: License policy
+        run: python3 scripts/check-licenses.py
+
+      - name: Build packages (lintian --fail-on error)
+        run: sh scripts/build-packages.sh
+
+      - name: Keep the built packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: erik-packages
+          path: /tmp/erik-work/debs/*.deb
+          if-no-files-found: error

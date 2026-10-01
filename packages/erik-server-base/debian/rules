@@ -1,0 +1,8 @@
+#!/usr/bin/make -f
+# SPDX-License-Identifier: GPL-3.0-only
+
+%:
+	dh $@
+
+execute_after_dh_fixperms:
+	chmod 0755 debian/erik-server-base/etc/update-motd.d/05-erik

@@ -1,0 +1,32 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Open the Erik OS installer when the live session starts.
+# The wrapper checks the kernel command line, so the autostart entry is
+# harmless if it is copied to the installed system.
+set -eu
+
+mkdir -p /usr/lib/erik /etc/xdg/autostart
+
+cat > /usr/lib/erik/erik-live-installer << 'WRAPPER'
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+grep -qw 'boot=live' /proc/cmdline || exit 0
+command -v calamares-install-debian >/dev/null 2>&1 || exit 0
+exec calamares-install-debian
+WRAPPER
+chmod 0755 /usr/lib/erik/erik-live-installer
+
+cat > /etc/xdg/autostart/erik-live-installer.desktop << 'DESKTOP'
+[Desktop Entry]
+Type=Application
+Name=Install Erik OS
+Name[de]=Erik OS installieren
+Name[es]=Instalar Erik OS
+Name[tr]=Erik OS'i kur
+Exec=/usr/lib/erik/erik-live-installer
+Icon=erik-logo
+Terminal=false
+NoDisplay=true
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-Delay=3
+DESKTOP

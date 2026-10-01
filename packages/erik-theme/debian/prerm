@@ -1,0 +1,11 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+set -e
+
+if [ "$1" = remove ] || [ "$1" = deconfigure ]; then
+    update-alternatives --remove vendor-logos /usr/share/erik/vendor-logos
+fi
+
+#DEBHELPER#
+
+exit 0

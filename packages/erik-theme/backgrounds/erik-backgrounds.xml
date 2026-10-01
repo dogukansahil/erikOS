@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
+<wallpapers>
+  <wallpaper deleted="false">
+    <name>Erik Dark</name>
+    <filename>/usr/share/backgrounds/erik/dark.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Beach</name>
+    <filename>/usr/share/backgrounds/erik/beach.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Dragon</name>
+    <filename>/usr/share/backgrounds/erik/dragon.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Lake</name>
+    <filename>/usr/share/backgrounds/erik/lake.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Lens</name>
+    <filename>/usr/share/backgrounds/erik/lens.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Mountain</name>
+    <filename>/usr/share/backgrounds/erik/mountain.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Blueprint</name>
+    <filename>/usr/share/backgrounds/erik/pen.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>Erik Sky</name>
+    <filename>/usr/share/backgrounds/erik/sky.jpg</filename>
+    <options>zoom</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#1d2321</pcolor>
+    <scolor>#1d2321</scolor>
+  </wallpaper>
+</wallpapers>

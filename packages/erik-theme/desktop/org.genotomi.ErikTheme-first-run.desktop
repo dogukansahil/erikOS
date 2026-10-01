@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-3.0-only
+[Desktop Entry]
+Type=Application
+Name=Erik Appearance
+Name[de]=Erik-Darstellung
+Name[es]=Apariencia de Erik
+Name[tr]=Erik Görünüm
+Comment=Welcome to Erik OS: choose how your desktop looks
+Comment[de]=Willkommen bei Erik OS: Aussehen des Desktops wählen
+Comment[es]=Bienvenido a Erik OS: elija el aspecto de su escritorio
+Comment[tr]=Erik OS'e hoş geldiniz: masaüstü görünümünü seçin
+Icon=erik-logo
+Exec=erik-theme-gui --first-run
+Terminal=false
+NoDisplay=true
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-Phase=Application

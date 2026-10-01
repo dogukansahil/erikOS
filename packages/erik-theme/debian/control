@@ -1,0 +1,20 @@
+Source: erik-theme
+Section: misc
+Priority: optional
+Maintainer: Genotomi <dogukansahil@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/Genotomi/erikos
+
+Package: erik-theme
+Architecture: all
+Depends: ${misc:Depends}, python3, python3-gi, gir1.2-gtk-4.0, gir1.2-adw-1, libglib2.0-bin, gsettings-desktop-schemas
+Description: Erik OS visual identity, wallpapers and theme tool
+ Erik OS wallpapers, logo and GNOME default settings, plus the
+ erik-theme command and the Erik Appearance app for listing, applying
+ and resetting them. The app opens after the first login and is
+ updated through apt together with this package.
+ .
+ All files in this package are original Erik OS work licensed
+ under GPL-3.0-only. Future appearance settings belong here.

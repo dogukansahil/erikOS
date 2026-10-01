@@ -1,0 +1,22 @@
+Source: erik-base
+Section: admin
+Priority: important
+Maintainer: Genotomi <dogukansahil@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/Genotomi/erikos
+
+Package: erik-base
+Architecture: all
+Depends: ${misc:Depends}, erik-archive-keyring
+Recommends: fastfetch
+Description: Erik OS system identity shared by every edition
+ Identifies the system as Erik OS through os-release while keeping
+ ID_LIKE=debian, so Debian tools keep working. Debian's own
+ os-release is kept under a dpkg diversion and comes back when this
+ package is removed.
+ .
+ Also ships the Erik ASCII logo and makes it the fastfetch logo.
+ .
+ Desktop and server editions depend on this package.

@@ -1,0 +1,10 @@
+PRETTY_NAME="Erik OS 0.4"
+NAME="Erik OS"
+VERSION_ID="0.4"
+VERSION="0.4"
+VERSION_CODENAME=trixie
+ID=erik
+ID_LIKE=debian
+HOME_URL="https://github.com/Genotomi/erikos"
+SUPPORT_URL="https://github.com/Genotomi/erikos"
+BUG_REPORT_URL="https://github.com/Genotomi/erikos/issues"

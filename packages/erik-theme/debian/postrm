@@ -1,0 +1,29 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Give the Debian and GNOME wallpaper lists back (see preinst).
+set -e
+
+PROPS=/usr/share/gnome-background-properties
+HIDDEN=/usr/share/erik/hidden-background-properties
+
+# Keep in sync with preinst.
+LISTS="adwaita amber blobs drool fold geometrics glass-chip lcd-rainbow lcd map
+mollnar morphogenesis neogeo pills pixels pride progress ring sheet swoosh
+symbolic-soup symbolic tarka vnc debian-ceratopsian debian-emerald
+debian-futureprototype debian-homeworld debian-joy-inksplat debian-joy
+debian-lines debian-moonlight debian-softwaves debian-spacefun"
+
+if [ "$1" = remove ] || [ "$1" = abort-install ] || [ "$1" = disappear ]; then
+    # dpkg may have removed the directory if erik-backgrounds.xml was the
+    # last file in it; the lists need it back before they can return.
+    mkdir -p "$PROPS"
+    for name in $LISTS; do
+        dpkg-divert --package erik-theme --remove --rename \
+            --divert "$HIDDEN/$name.xml" "$PROPS/$name.xml"
+    done
+    rmdir "$HIDDEN" 2>/dev/null || true
+fi
+
+#DEBHELPER#
+
+exit 0

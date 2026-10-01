@@ -1,0 +1,17 @@
+Source: erik-server-base
+Section: metapackages
+Priority: optional
+Maintainer: Genotomi <dogukansahil@gmail.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/Genotomi/erikos
+
+Package: erik-server-base
+Architecture: all
+Depends: ${misc:Depends}, erik-base
+Recommends: openssh-server
+Description: Erik OS server edition defaults
+ Headless defaults for Erik OS compute and pipeline nodes: Erik login
+ banner and remote access through OpenSSH. Installs no graphical
+ desktop.

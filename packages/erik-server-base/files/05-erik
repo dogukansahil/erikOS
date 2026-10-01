@@ -1,0 +1,22 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Erik OS login banner, in the system language.
+
+. /usr/lib/os-release 2>/dev/null || true
+lang=en
+if [ -r /etc/default/locale ]; then
+    l=$(sed -n 's/^LANG=["]\{0,1\}\([a-z][a-z]\).*/\1/p' /etc/default/locale)
+    case "$l" in de|es|tr) lang=$l ;; esac
+fi
+
+case "$lang" in
+    de) line="Server-Edition. Hilfe zu Erik-Werkzeugen: erik-<werkzeug> --help" ;;
+    es) line="Edición servidor. Ayuda de las herramientas Erik: erik-<herramienta> --help" ;;
+    tr) line="Sunucu sürümü. Erik araçları için yardım: erik-<araç> --help" ;;
+    *)  line="Server edition. Help for Erik tools: erik-<tool> --help" ;;
+esac
+
+logo=/usr/share/erik/artwork/erik-logo.txt
+printf '\n'
+[ -r "$logo" ] && sed 's/^/  /' "$logo" | sed 's/.*/\x1b[32m&\x1b[0m/'
+printf '\n  %s\n  %s\n\n' "${PRETTY_NAME:-Erik OS}" "$line"

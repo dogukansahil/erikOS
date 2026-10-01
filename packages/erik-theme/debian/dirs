@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+usr/share/images
+usr/share/icons/vendor/64x64/emblems
+usr/share/icons/vendor/128x128/emblems
+usr/share/icons/vendor/256x256/emblems

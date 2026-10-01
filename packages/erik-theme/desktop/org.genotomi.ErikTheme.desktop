@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-3.0-only
+[Desktop Entry]
+Type=Application
+Name=Erik Appearance
+Name[de]=Erik-Darstellung
+Name[es]=Apariencia de Erik
+Name[tr]=Erik Görünüm
+Comment=Choose the wallpaper, style and accent colour of Erik OS
+Comment[de]=Hintergrundbild, Stil und Akzentfarbe von Erik OS wählen
+Comment[es]=Elija el fondo de pantalla, el estilo y el color de énfasis de Erik OS
+Comment[tr]=Erik OS duvar kağıdını, stilini ve vurgu rengini seçin
+Icon=erik-logo
+Exec=erik-theme-gui
+Terminal=false
+StartupNotify=true
+Categories=GTK;GNOME;Settings;DesktopSettings;
+Keywords=Erik;Appearance;Theme;Wallpaper;Background;Accent;Dark;Light;
+Keywords[de]=Erik;Darstellung;Design;Hintergrund;Hintergrundbild;Akzent;Dunkel;Hell;
+Keywords[es]=Erik;Apariencia;Tema;Fondo;Fondo de pantalla;Énfasis;Oscuro;Claro;
+Keywords[tr]=Erik;Görünüm;Tema;Duvar kağıdı;Arka plan;Vurgu;Koyu;Açık;

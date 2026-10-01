@@ -1,0 +1,12 @@
+erik-desktop-base (0.2.0) stable; urgency=medium
+
+  * Conflict with gnome-tour: the GNOME tour is never installed, not even
+    after installation.
+
+ -- Genotomi <dogukansahil@gmail.com>  Thu, 01 Oct 2026 19:00:00 +0300
+
+erik-desktop-base (0.1.0) stable; urgency=medium
+
+  * Initial package.
+
+ -- Genotomi <dogukansahil@gmail.com>  Thu, 01 Oct 2026 15:00:00 +0300

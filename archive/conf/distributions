@@ -1,0 +1,17 @@
+Origin: Erik OS
+Label: Erik OS
+Suite: stable
+Codename: stable
+Architectures: amd64 source
+Components: main
+Description: Erik OS packages, stable channel
+SignWith: yes
+
+Origin: Erik OS
+Label: Erik OS
+Suite: testing
+Codename: testing
+Architectures: amd64 source
+Components: main
+Description: Erik OS packages, testing channel
+SignWith: yes

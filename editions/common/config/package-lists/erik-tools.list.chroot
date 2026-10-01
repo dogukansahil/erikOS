@@ -1,0 +1,4 @@
+# System information and monitoring (Debian main)
+fastfetch
+lm-sensors
+procps

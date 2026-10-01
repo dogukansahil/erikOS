@@ -1,0 +1,34 @@
+---
+componentName: erik
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 900px,600px
+windowPlacement: center
+
+strings:
+    productName: Erik OS
+    shortProductName: Erik OS
+    version: 0.4
+    shortversion: 0.4
+    versionedName: Erik OS 0.4
+    shortversionedName: Erik OS 0.4
+    bootloaderEntryName: Erik OS
+    productUrl: https://github.com/Genotomi/erikos
+
+sidebar: widget
+navigation: widget
+
+images:
+    productLogo: logo.png
+    productIcon: logo.png
+    productWelcome: logo.png
+
+slideshow: show.qml
+slideshowAPI: 2
+
+style:
+    SidebarBackground: "#eff4e9"
+    SidebarText: "#33432b"
+    SidebarTextCurrent: "#1f3b1b"
+    SidebarBackgroundCurrent: "#d7e7c6"

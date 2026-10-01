@@ -1,0 +1,18 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+set -e
+
+# Keep Debian's os-release aside before dpkg unpacks Erik's copy.
+# os-release belongs to an Essential package, so it is copied and diverted
+# without renaming: the file never disappears, not even for a moment.
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+    if ! dpkg-divert --list /usr/lib/os-release | grep -q 'by erik-base$'; then
+        cp -a /usr/lib/os-release /usr/lib/os-release.debian
+        dpkg-divert --package erik-base --add --no-rename \
+            --divert /usr/lib/os-release.debian /usr/lib/os-release
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

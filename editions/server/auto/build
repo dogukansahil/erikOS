@@ -1,0 +1,6 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Run through scripts/build-iso.sh, which assembles this tree first.
+set -eu
+
+lb build noauto "$@"

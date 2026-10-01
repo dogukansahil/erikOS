@@ -1,0 +1,213 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Doğukan Sahil
+"""erik-theme: list, apply and reset Erik OS appearance settings."""
+
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+VERSION = "0.2.0"
+BACKGROUNDS = Path("/usr/share/backgrounds/erik")
+DEFAULT_BACKGROUND = "dark"
+
+# Keys erik-theme manages. "reset" returns exactly these to the system default.
+MANAGED_KEYS = (
+    ("org.gnome.desktop.background", "picture-uri"),
+    ("org.gnome.desktop.background", "picture-uri-dark"),
+    ("org.gnome.desktop.background", "picture-options"),
+    ("org.gnome.desktop.background", "primary-color"),
+    ("org.gnome.desktop.screensaver", "picture-uri"),
+    ("org.gnome.desktop.screensaver", "picture-options"),
+    ("org.gnome.desktop.screensaver", "primary-color"),
+    ("org.gnome.desktop.interface", "accent-color"),
+)
+
+# Human-readable text in the four Erik OS languages. Command names, JSON
+# field names and exit codes stay the same in every language.
+MESSAGES = {
+    "en": {
+        "description": "List, apply and reset Erik OS appearance settings.",
+        "list": "list installed Erik wallpapers",
+        "set": "use a wallpaper for the desktop and lock screen",
+        "reset": "return all Erik appearance settings to the system default",
+        "json": "print machine-readable JSON",
+        "name": "wallpaper name, for example: dark",
+        "current": "current",
+        "applied": "Wallpaper set: {name}",
+        "reset_done": "Erik appearance settings returned to the system default.",
+        "unknown": "Unknown wallpaper: {name}. Run 'erik-theme list' to see the choices.",
+        "no_gsettings": "gsettings was not found. Install the libglib2.0-bin package.",
+        "no_session": "No desktop session found. Run this command as the desktop user, not with sudo.",
+        "failed": "Could not change the setting: {error}",
+    },
+    "de": {
+        "description": "Erik-OS-Darstellung anzeigen, anwenden und zurücksetzen.",
+        "list": "installierte Erik-Hintergrundbilder auflisten",
+        "set": "Hintergrundbild für Desktop und Sperrbildschirm verwenden",
+        "reset": "alle Erik-Darstellungseinstellungen auf den Systemstandard zurücksetzen",
+        "json": "maschinenlesbares JSON ausgeben",
+        "name": "Name des Hintergrundbilds, zum Beispiel: dark",
+        "current": "aktuell",
+        "applied": "Hintergrundbild gesetzt: {name}",
+        "reset_done": "Erik-Darstellungseinstellungen wurden auf den Systemstandard zurückgesetzt.",
+        "unknown": "Unbekanntes Hintergrundbild: {name}. 'erik-theme list' zeigt die Auswahl.",
+        "no_gsettings": "gsettings wurde nicht gefunden. Installieren Sie das Paket libglib2.0-bin.",
+        "no_session": "Keine Desktop-Sitzung gefunden. Führen Sie den Befehl als Desktop-Benutzer aus, nicht mit sudo.",
+        "failed": "Die Einstellung konnte nicht geändert werden: {error}",
+    },
+    "es": {
+        "description": "Listar, aplicar y restablecer la apariencia de Erik OS.",
+        "list": "listar los fondos de pantalla de Erik instalados",
+        "set": "usar un fondo para el escritorio y la pantalla de bloqueo",
+        "reset": "devolver toda la apariencia de Erik al valor predeterminado del sistema",
+        "json": "mostrar JSON legible por máquina",
+        "name": "nombre del fondo, por ejemplo: dark",
+        "current": "actual",
+        "applied": "Fondo establecido: {name}",
+        "reset_done": "La apariencia de Erik volvió al valor predeterminado del sistema.",
+        "unknown": "Fondo desconocido: {name}. Ejecute 'erik-theme list' para ver las opciones.",
+        "no_gsettings": "No se encontró gsettings. Instale el paquete libglib2.0-bin.",
+        "no_session": "No se encontró una sesión de escritorio. Ejecute la orden como el usuario del escritorio, no con sudo.",
+        "failed": "No se pudo cambiar el ajuste: {error}",
+    },
+    "tr": {
+        "description": "Erik OS görünüm ayarlarını listeler, uygular ve sıfırlar.",
+        "list": "kurulu Erik duvar kağıtlarını listele",
+        "set": "masaüstü ve kilit ekranı için duvar kağıdı seç",
+        "reset": "tüm Erik görünüm ayarlarını sistem varsayılanına döndür",
+        "json": "makine tarafından okunabilir JSON yazdır",
+        "name": "duvar kağıdı adı, örneğin: dark",
+        "current": "geçerli",
+        "applied": "Duvar kağıdı ayarlandı: {name}",
+        "reset_done": "Erik görünüm ayarları sistem varsayılanına döndü.",
+        "unknown": "Bilinmeyen duvar kağıdı: {name}. Seçenekler için 'erik-theme list' çalıştırın.",
+        "no_gsettings": "gsettings bulunamadı. libglib2.0-bin paketini kurun.",
+        "no_session": "Masaüstü oturumu bulunamadı. Komutu sudo ile değil, masaüstü kullanıcısı olarak çalıştırın.",
+        "failed": "Ayar değiştirilemedi: {error}",
+    },
+}
+
+EXIT_OK = 0
+EXIT_USAGE = 2
+EXIT_UNKNOWN = 3
+EXIT_ENVIRONMENT = 4
+
+
+def language():
+    for var in ("LC_ALL", "LC_MESSAGES", "LANG", "LANGUAGE"):
+        value = os.environ.get(var, "")
+        code = value.split(":")[0][:2].lower()
+        if code in MESSAGES:
+            return code
+    return "en"
+
+
+T = MESSAGES[language()]
+
+
+def wallpapers():
+    if not BACKGROUNDS.is_dir():
+        return []
+    return sorted(p.stem for p in BACKGROUNDS.glob("*.jpg"))
+
+
+def gsettings(*args):
+    if shutil.which("gsettings") is None:
+        print(T["no_gsettings"], file=sys.stderr)
+        sys.exit(EXIT_ENVIRONMENT)
+    if os.geteuid() == 0 and "SUDO_USER" in os.environ:
+        print(T["no_session"], file=sys.stderr)
+        sys.exit(EXIT_ENVIRONMENT)
+    result = subprocess.run(["gsettings", *args], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(T["failed"].format(error=result.stderr.strip()), file=sys.stderr)
+        sys.exit(EXIT_ENVIRONMENT)
+    return result.stdout.strip()
+
+
+def current_wallpaper():
+    if shutil.which("gsettings") is None:
+        return None
+    result = subprocess.run(
+        ["gsettings", "get", "org.gnome.desktop.background", "picture-uri"],
+        capture_output=True, text=True,
+    )
+    uri = result.stdout.strip().strip("'")
+    prefix = f"file://{BACKGROUNDS}/"
+    if uri.startswith(prefix) and uri.endswith(".jpg"):
+        return uri[len(prefix):-4]
+    return None
+
+
+def cmd_list(args):
+    names = wallpapers()
+    current = current_wallpaper()
+    if args.json:
+        print(json.dumps({
+            "wallpapers": [
+                {"name": n, "path": str(BACKGROUNDS / f"{n}.jpg"),
+                 "default": n == DEFAULT_BACKGROUND, "current": n == current}
+                for n in names
+            ]
+        }, indent=2))
+        return EXIT_OK
+    for n in names:
+        mark = f"  ({T['current']})" if n == current else ""
+        print(f"{n}{mark}")
+    return EXIT_OK
+
+
+def cmd_set(args):
+    if args.name not in wallpapers():
+        print(T["unknown"].format(name=args.name), file=sys.stderr)
+        return EXIT_UNKNOWN
+    uri = f"file://{BACKGROUNDS}/{args.name}.jpg"
+    gsettings("set", "org.gnome.desktop.background", "picture-uri", uri)
+    gsettings("set", "org.gnome.desktop.background", "picture-uri-dark", uri)
+    gsettings("set", "org.gnome.desktop.screensaver", "picture-uri", uri)
+    if args.json:
+        print(json.dumps({"applied": args.name, "uri": uri}))
+    else:
+        print(T["applied"].format(name=args.name))
+    return EXIT_OK
+
+
+def cmd_reset(args):
+    for schema, key in MANAGED_KEYS:
+        gsettings("reset", schema, key)
+    if args.json:
+        print(json.dumps({"reset": [f"{s} {k}" for s, k in MANAGED_KEYS]}))
+    else:
+        print(T["reset_done"])
+    return EXIT_OK
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="erik-theme", description=T["description"])
+    parser.add_argument("--version", action="version", version=f"erik-theme {VERSION}")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_list = sub.add_parser("list", help=T["list"])
+    p_list.add_argument("--json", action="store_true", help=T["json"])
+    p_list.set_defaults(func=cmd_list)
+
+    p_set = sub.add_parser("set", help=T["set"])
+    p_set.add_argument("name", help=T["name"])
+    p_set.add_argument("--json", action="store_true", help=T["json"])
+    p_set.set_defaults(func=cmd_set)
+
+    p_reset = sub.add_parser("reset", help=T["reset"])
+    p_reset.add_argument("--json", action="store_true", help=T["json"])
+    p_reset.set_defaults(func=cmd_reset)
+
+    args = parser.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,28 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Hide Debian and GNOME wallpaper lists from GNOME Settings, so only Erik
+# wallpapers are offered. The files are moved aside with dpkg-divert, never
+# edited, and come back when erik-theme is removed (see postrm).
+set -e
+
+PROPS=/usr/share/gnome-background-properties
+HIDDEN=/usr/share/erik/hidden-background-properties
+
+# Keep in sync with postrm.
+LISTS="adwaita amber blobs drool fold geometrics glass-chip lcd-rainbow lcd map
+mollnar morphogenesis neogeo pills pixels pride progress ring sheet swoosh
+symbolic-soup symbolic tarka vnc debian-ceratopsian debian-emerald
+debian-futureprototype debian-homeworld debian-joy-inksplat debian-joy
+debian-lines debian-moonlight debian-softwaves debian-spacefun"
+
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+    mkdir -p "$HIDDEN"
+    for name in $LISTS; do
+        dpkg-divert --package erik-theme --add --rename \
+            --divert "$HIDDEN/$name.xml" "$PROPS/$name.xml"
+    done
+fi
+
+#DEBHELPER#
+
+exit 0

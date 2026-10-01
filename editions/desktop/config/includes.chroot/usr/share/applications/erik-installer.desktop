@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-only
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Erik OS
+Name[de]=Erik OS installieren
+Name[es]=Instalar Erik OS
+Name[tr]=Erik OS'i kur
+GenericName=System Installer
+GenericName[de]=Systeminstallation
+GenericName[es]=Instalador del sistema
+GenericName[tr]=Sistem kurucusu
+Comment=Install Erik OS on this computer
+Comment[de]=Erik OS auf diesem Computer installieren
+Comment[es]=Instalar Erik OS en este equipo
+Comment[tr]=Erik OS'i bu bilgisayara kur
+Exec=calamares-install-debian
+Icon=erik-logo
+Terminal=false
+Categories=Qt;System;
+StartupWMClass=calamares
+StartupNotify=true

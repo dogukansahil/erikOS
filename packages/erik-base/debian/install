@@ -1,0 +1,4 @@
+files/os-release usr/lib/
+files/erik-logo.txt usr/share/erik/artwork/
+files/erik-logo-fastfetch.txt usr/share/erik/artwork/
+files/config.jsonc etc/xdg/fastfetch/

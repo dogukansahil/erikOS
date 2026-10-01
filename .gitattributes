@@ -1,0 +1,6 @@
+# Debian packages, live-build files and shell scripts must use LF.
+* text=auto eol=lf
+*.jpg binary
+*.png binary
+*.gpg binary
+*.iso binary

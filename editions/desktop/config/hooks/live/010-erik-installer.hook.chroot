@@ -1,0 +1,31 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Live image only: use Erik's installer branding and launcher.
+# Files of other packages are never edited in place: Debian's launcher is
+# moved aside with a local dpkg diversion; settings.conf is the one known
+# exception (see scripts/audit-allowlist.conf and ROADMAP).
+set -eu
+
+settings=/etc/calamares/settings.conf
+branding=/etc/calamares/branding/erik
+launcher=/usr/share/applications/erik-installer.desktop
+debian_launcher=/usr/share/applications/calamares-install-debian.desktop
+
+if [ ! -f "$settings" ] || [ "$(grep -c '^branding: debian$' "$settings" || true)" -ne 1 ]; then
+    echo 'Expected Debian Calamares branding setting is missing.' >&2
+    exit 1
+fi
+if [ ! -s "$branding/branding.desc" ] || [ ! -s "$branding/logo.png" ]; then
+    echo 'Erik Calamares branding is incomplete.' >&2
+    exit 1
+fi
+if [ ! -f "$launcher" ] || ! grep -qx 'Exec=calamares-install-debian' "$launcher"; then
+    echo 'Erik installer launcher is missing or uses the wrong wrapper.' >&2
+    exit 1
+fi
+
+sed -i 's/^branding: debian$/branding: erik/' "$settings"
+
+mkdir -p /usr/share/erik/diverted
+dpkg-divert --local --add --rename \
+    --divert /usr/share/erik/diverted/calamares-install-debian.desktop "$debian_launcher"

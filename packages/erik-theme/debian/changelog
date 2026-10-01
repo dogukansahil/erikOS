@@ -1,0 +1,16 @@
+erik-theme (0.2.0) stable; urgency=medium
+
+  * Add the Erik Appearance app (erik-theme-gui): wallpaper, style and
+    accent colour chooser. It opens once after the first login, replacing
+    the GNOME welcome tour, and stays in the app grid.
+  * Register Erik's logo as the vendor-logos alternative (priority 100), so
+    the GDM login screen shows Erik instead of Debian.
+
+ -- Genotomi <dogukansahil@gmail.com>  Thu, 01 Oct 2026 18:00:00 +0300
+
+erik-theme (0.1.0) stable; urgency=medium
+
+  * Initial package: eight Erik wallpapers, logo, GNOME defaults and the
+    erik-theme command (English, German, Spanish, Turkish).
+
+ -- Genotomi <dogukansahil@gmail.com>  Thu, 01 Oct 2026 15:00:00 +0300

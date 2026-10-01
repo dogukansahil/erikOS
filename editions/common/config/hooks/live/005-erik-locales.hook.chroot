@@ -1,0 +1,6 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+# Generate the four Erik OS locales listed in /etc/locale.gen.
+set -eu
+
+locale-gen

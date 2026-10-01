@@ -1,0 +1,16 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-only
+set -e
+
+# Give Debian's os-release back when Erik's identity is removed (see preinst).
+if [ "$1" = remove ] || [ "$1" = abort-install ] || [ "$1" = disappear ]; then
+    if dpkg-divert --list /usr/lib/os-release | grep -q 'by erik-base$'; then
+        dpkg-divert --package erik-base --remove --no-rename \
+            --divert /usr/lib/os-release.debian /usr/lib/os-release
+        mv -f /usr/lib/os-release.debian /usr/lib/os-release
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

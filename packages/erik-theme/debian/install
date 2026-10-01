@@ -1,0 +1,9 @@
+backgrounds/*.jpg usr/share/backgrounds/erik/
+backgrounds/erik-backgrounds.xml usr/share/gnome-background-properties/
+artwork/logo.png usr/share/erik/artwork/
+schemas/50_erik-theme.gschema.override usr/share/glib-2.0/schemas/
+bin/erik-theme usr/bin/
+bin/erik-theme-gui usr/bin/
+desktop/org.genotomi.ErikTheme.desktop usr/share/applications/
+desktop/org.genotomi.ErikTheme-first-run.desktop etc/xdg/autostart/
+artwork/vendor-logos/* usr/share/erik/vendor-logos/
