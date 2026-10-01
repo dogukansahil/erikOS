@@ -106,6 +106,14 @@ def main() -> int:
                 if s in text:
                     problems.append(f"{rel}: contains '{s}' (local path or build host)")
                     break
+    # The version badge in README.md must follow VERSION on every release.
+    version = (ROOT / "VERSION").read_text().strip()
+    badge = re.search(r"img\.shields\.io/badge/version-([0-9][0-9.]*)-", (ROOT / "README.md").read_text())
+    if not badge:
+        problems.append("README.md: version badge missing")
+    elif badge.group(1) != version:
+        problems.append(f"README.md: version badge says {badge.group(1)}, VERSION says {version}")
+
     if problems:
         print("Repository check failed:", file=sys.stderr)
         for p in problems:

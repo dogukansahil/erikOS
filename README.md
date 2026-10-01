@@ -1,5 +1,10 @@
 # Erik OS
 
+[![Version](https://img.shields.io/badge/version-0.4-blue)](https://github.com/Genotomi/erikos/releases/latest)
+![Download](https://img.shields.io/badge/download-releases-brightgreen)
+[![Debian](https://img.shields.io/badge/Debian-13%20trixie-A81D33?logo=debian&logoColor=white)](https://www.debian.org/releases/trixie/)
+[![License](https://img.shields.io/badge/license-GPL--3.0--only-lightgrey)](LICENSE)
+
 Erik OS is a Debian 13 (trixie) and GNOME based distribution for the life
 sciences, by [Genotomi](https://github.com/Genotomi). It is built with
 [live-build](https://live-team.pages.debian.net/live-manual/) and comes in

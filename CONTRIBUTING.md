@@ -79,6 +79,15 @@ python3 scripts/check-repo.py              # before every commit
 - Never commit ISOs, build output, the `build-environment/` directory or any
   key material.
 
+## Releasing a version
+
+1. Update `VERSION`, the version badge at the top of `README.md` (checked by
+   `scripts/check-repo.py`), `CHANGELOG.md` and the versions in the Erik
+   packages that changed.
+2. Build with `sh scripts/build-iso.sh --release all`; both audits must pass.
+3. Tag the commit (`v0.5`) and publish the ISOs, `SHA256SUMS`, audit reports
+   and manifests on GitHub Releases.
+
 ## Add a new package
 
 See [`packages/README.md`](packages/README.md) ("Add a new tool").
